@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    // Target modern Node.js — we use ES2020 features (optional chaining, nullish coalescing)
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+
+    // Strict mode — catches null bugs, implicit any, and unsafe casts at compile time
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+
+    // Output config
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    // Path resolution
+    "esModuleInterop": true,       // Allows: import express from 'express'
+    "resolveJsonModule": true,     // Allows importing .json files
+    "moduleResolution": "node",
+
+    // Source maps for readable stack traces in production errors
+    "sourceMap": true,
+
+    // Decorator support (needed if we ever add class-based DI)
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Skip type checking of node_modules — faster builds
+    "skipLibCheck": true,
+
+    // Force consistent casing in imports — prevents Linux/Mac discrepancies
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

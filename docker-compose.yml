@@ -1,0 +1,151 @@
+
+# CURRENTLY NO FRONTEND RELATED CODE IN THIS
+
+networks:
+  ims-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  mongo-data:
+  redis-data:
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ims-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: imsdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - ims-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ims_user} -d ${POSTGRES_DB:-ims_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  mongo:
+    image: mongo:7-jammy
+    container_name: ims-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-ims_user}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-ims_password}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-ims}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - ims-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    container_name: ims-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ims-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ims-api
+    restart: unless-stopped
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/imsdb      
+      MONGO_URI: mongodb://${MONGO_USER:-ims_user}:${MONGO_PASSWORD:-ims_password}@mongo:27017/${MONGO_DB:-ims}?authSource=admin
+      REDIS_URL: redis://redis:6379
+      DEBOUNCE_TTL_SECONDS: 10
+      RATE_LIMIT_WINDOW_MS: 60000
+      RATE_LIMIT_MAX_REQUESTS: 100
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/src:/app/src
+      - /app/node_modules
+    networks:
+      - ims-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ims-worker
+    restart: unless-stopped
+    command: npm run worker
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/imsdb
+      MONGO_URI: mongodb://${MONGO_USER:-ims_user}:${MONGO_PASSWORD:-ims_password}@mongo:27017/${MONGO_DB:-ims}?authSource=admin
+      REDIS_URL: redis://redis:6379
+      DEBOUNCE_TTL_SECONDS: 10
+    volumes:
+      - ./backend/src:/app/src
+      - /app/node_modules
+    networks:
+      - ims-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  migrator:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ims-migrator
+    command: npx prisma migrate deploy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ims_user}:${POSTGRES_PASSWORD:-ims_password}@postgres:5432/${POSTGRES_DB:-ims_db}
+    networks:
+      - ims-network
+    depends_on:
+      postgres:
+        condition: service_healthy
