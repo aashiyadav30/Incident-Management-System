@@ -311,6 +311,77 @@ PATCH /api/incidents/:id/status
 ```
 
 ---
+Add this section near your “Example API Requests” or after “Local Setup” in the README. Your current README content is in 
+
+---
+
+# Sample Failure Simulation
+
+Use the provided sample failure dataset to simulate incidents across the stack.
+
+Location:
+
+```txt id="a1b2c3"
+sample-data/failure-simulation.json
+```
+
+This dataset includes:
+
+* PostgreSQL outage
+* MCP gateway timeout
+* Redis memory pressure
+* Cache cluster failures
+* API gateway failures
+* Authentication latency spikes
+
+---
+
+## Send All Sample Signals
+
+Run the following command from the project root:
+
+```bash id="d4e5f6"
+jq -c '.[]' sample-data/failure-simulation.json | while read line; do
+  curl -X POST http://localhost:3000/api/signals \
+    -H "Content-Type: application/json" \
+    -d "$line"
+  echo
+done
+```
+
+This automatically sends all sample incidents into the ingestion pipeline.
+
+---
+
+## Expected Behavior
+
+The system will:
+
+* Persist raw signals in MongoDB
+* Queue processing jobs using BullMQ
+* Apply Redis debounce protection
+* Create or link incidents in PostgreSQL
+* Trigger severity-based alert strategies
+* Update the React dashboard in real time
+
+---
+
+## Debounce Demonstration
+
+Multiple rapid signals for the same component should produce:
+
+```txt id="g7h8i9"
+5 simultaneous signals → 1 incident created
+```
+
+This demonstrates:
+
+* backpressure handling
+* concurrent-safe ingestion
+* distributed coordination using Redis
+* queue-based worker processing 🚀
+
+---
 
 #  Metrics Supported
 
