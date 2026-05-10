@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# env files
+.env
+backend/.env
+frontend/.env
+
+# build output
+dist/
+build/
+
+# logs
+*.log
+
+# macOS
+.DS_Store
+
+# vite
+.vite/
+
+# coverage
+coverage/
