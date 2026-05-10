@@ -1,0 +1,62 @@
+[
+  {
+    "component_id": "POSTGRES_CLUSTER",
+    "severity": "P0",
+    "message": "Primary PostgreSQL database unreachable",
+    "timestamp": "2026-05-09T10:00:00Z"
+  },
+  {
+    "component_id": "MCP_GATEWAY",
+    "severity": "P1",
+    "message": "MCP downstream timeout detected",
+    "timestamp": "2026-05-09T10:01:00Z"
+  },
+  {
+    "component_id": "CACHE_CLUSTER_01",
+    "severity": "P2",
+    "message": "Cache timeout exceeded",
+    "timestamp": "2026-05-09T10:02:00Z"
+  },
+  {
+    "component_id": "AUTH_SERVICE",
+    "severity": "P1",
+    "message": "Authentication latency spike detected",
+    "timestamp": "2026-05-09T10:03:00Z"
+  },
+  {
+    "component_id": "PAYMENT_GATEWAY",
+    "severity": "P0",
+    "message": "Payment processing outage impacting transactions",
+    "timestamp": "2026-05-09T10:04:00Z"
+  },
+  {
+    "component_id": "NOTIFICATION_SERVICE",
+    "severity": "P2",
+    "message": "Email delivery queue backlog increasing",
+    "timestamp": "2026-05-09T10:05:00Z"
+  },
+  {
+    "component_id": "SEARCH_ENGINE",
+    "severity": "P1",
+    "message": "Search indexing delay exceeding SLA",
+    "timestamp": "2026-05-09T10:06:00Z"
+  },
+  {
+    "component_id": "API_GATEWAY",
+    "severity": "P0",
+    "message": "Gateway returning widespread 502 responses",
+    "timestamp": "2026-05-09T10:07:00Z"
+  },
+  {
+    "component_id": "USER_PROFILE_SERVICE",
+    "severity": "P2",
+    "message": "Profile image upload latency increased",
+    "timestamp": "2026-05-09T10:08:00Z"
+  },
+  {
+    "component_id": "REDIS_CLUSTER",
+    "severity": "P1",
+    "message": "Redis memory usage exceeded threshold",
+    "timestamp": "2026-05-09T10:09:00Z"
+  }
+]
